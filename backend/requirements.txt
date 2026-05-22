@@ -1,0 +1,23 @@
+# API framework
+fastapi
+uvicorn[standard]
+pydantic
+
+# Environment variables
+python-dotenv
+
+# YouTube transcript extraction
+youtube-transcript-api
+
+# OpenRouter/OpenAI-compatible client
+openai
+
+# Vector database
+chromadb
+
+# Reranking
+sentence-transformers
+torch
+transformers
+numpy
+scikit-learn
