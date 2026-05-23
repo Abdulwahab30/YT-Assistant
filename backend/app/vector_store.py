@@ -24,6 +24,18 @@ def delete_video_chunks(video_id: str) -> None:
             ids=existing["ids"]
         )
 
+        
+def video_exists(video_id: str) -> bool:
+    """
+    Checks whether chunks already exist for a video.
+    """
+    results = collection.get(
+        where={"video_id": video_id},
+        include=[],
+        limit=1
+    )
+
+    return bool(results.get("ids"))
 
 def store_chunks(video_id: str, chunks: list[dict], embeddings: list[list[float]]) -> None:
     """

@@ -1,3 +1,4 @@
+from importlib import resources
 from importlib import metadata
 import os
 from dotenv import load_dotenv
@@ -6,7 +7,8 @@ from openai import OpenAI
 from .embeddings import create_embedding
 from .vector_store import retrieve_chunks
 from .reranker import rerank_chunks
-
+from .retry_utils import retry_external_call
+from .semantic_cache import get_cached_answer, save_answer_to_cache
 
 load_dotenv(dotenv_path=os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env")))
 
@@ -50,6 +52,22 @@ def build_context(chunks: list[dict]) -> str:
 
     return "\n\n".join(context_parts)
 
+@retry_external_call()
+def call_llm(prompt: str):
+    return client.chat.completions.create(
+        model=CHAT_MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": "You answer questions using only the provided YouTube transcript context."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        temperature=0.2
+    )
 
 def answer_question(video_id: str, question: str) -> dict:
     """
@@ -57,7 +75,24 @@ def answer_question(video_id: str, question: str) -> dict:
     """
 
     question_embedding = create_embedding(question)
+    # cached = get_cached_answer(
+    # video_id=video_id,
+    # question_embedding=question_embedding
+    # )
 
+    # if cached is not None:
+    #     return {
+    #         "video_id": video_id,
+    #         "question": question,
+    #         "answer": cached["answer"],
+    #         "sources": cached["sources"],
+    #         "cache": {
+    #             "hit": True,
+    #             "cached_question": cached["cached_question"],
+    #             "distance": cached["cache_distance"],
+    #             "created_at": cached["created_at"]
+    #         }
+    #     }
     initial_chunks = retrieve_chunks(
     question_embedding=question_embedding,
     video_id=video_id,
@@ -93,20 +128,7 @@ def answer_question(video_id: str, question: str) -> dict:
     {question}
     """
 
-    response = client.chat.completions.create(
-        model=CHAT_MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": "You answer questions using only the provided YouTube transcript context."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        temperature=0.2
-    )
+    response = call_llm(prompt)
 
     answer = response.choices[0].message.content
 
@@ -127,6 +149,13 @@ def answer_question(video_id: str, question: str) -> dict:
             "rerank_score": chunk.get("rerank_score"),
             "text_preview": chunk["text"][:300] + "..."
         })
+    save_answer_to_cache(
+        video_id=video_id,
+        question=question,
+        question_embedding=question_embedding,
+        answer=answer,
+        sources=sources
+    )
 
     return {
     "video_id": video_id,

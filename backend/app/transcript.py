@@ -1,16 +1,11 @@
 from urllib.parse import urlparse, parse_qs
 from youtube_transcript_api import YouTubeTranscriptApi
 
+from .cache import load_cached_transcript, save_cached_transcript
+from .retry_utils import retry_external_call
+
 
 def extract_video_id(youtube_url: str) -> str:
-    """
-    Extracts the video ID from common YouTube URL formats.
-
-    Examples:
-    - https://www.youtube.com/watch?v=abc123
-    - https://youtu.be/abc123
-    - https://www.youtube.com/embed/abc123
-    """
     parsed_url = urlparse(youtube_url)
 
     if parsed_url.hostname in ["www.youtube.com", "youtube.com", "m.youtube.com"]:
@@ -30,21 +25,11 @@ def extract_video_id(youtube_url: str) -> str:
     raise ValueError("Invalid YouTube URL")
 
 
-def get_transcript(youtube_url: str) -> list[dict]:
+@retry_external_call()
+def fetch_transcript_from_youtube(video_id: str) -> list[dict]:
     """
-    Returns transcript segments from a YouTube video.
-
-    Output format expected by our chunking code:
-    [
-        {
-            "text": "...",
-            "start": 0.0,
-            "duration": 4.2
-        }
-    ]
+    Fetch transcript from YouTube with retry.
     """
-    video_id = extract_video_id(youtube_url)
-
     ytt_api = YouTubeTranscriptApi()
     fetched_transcript = ytt_api.fetch(video_id)
 
@@ -56,5 +41,24 @@ def get_transcript(youtube_url: str) -> list[dict]:
             "start": snippet.start,
             "duration": snippet.duration
         })
+
+    return transcript
+
+
+def get_transcript(youtube_url: str) -> list[dict]:
+    """
+    Gets transcript from cache first.
+    If not cached, fetches from YouTube and caches it.
+    """
+    video_id = extract_video_id(youtube_url)
+
+    cached = load_cached_transcript(video_id)
+
+    if cached is not None:
+        return cached
+
+    transcript = fetch_transcript_from_youtube(video_id)
+
+    save_cached_transcript(video_id, transcript)
 
     return transcript

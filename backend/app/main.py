@@ -8,8 +8,19 @@ from .transcript import get_transcript, extract_video_id
 from .chunking import chunk_transcript
 from .rag import answer_question
 from .embeddings import create_embedding, create_embeddings
-from .vector_store import store_chunks, get_video_chunks, retrieve_chunks
+from .vector_store import (
+    store_chunks,
+    get_video_chunks,
+    retrieve_chunks,
+    video_exists,
+)
 from .reranker import rerank_chunks
+from .semantic_cache import clear_answer_cache
+
+
+
+
+
 
 app = FastAPI(title="YouTube Video Chatbot")
 
@@ -24,6 +35,7 @@ app.add_middleware(
 
 class IngestRequest(BaseModel):
     youtube_url: str
+    force: bool = False
 
 
 class IngestResponse(BaseModel):
@@ -54,9 +66,22 @@ def ingest_video(request: IngestRequest):
     try:
         video_id = extract_video_id(request.youtube_url)
 
+        if video_exists(video_id) and not request.force:
+            chunks = get_video_chunks(video_id)
+
+            return {
+                "video_id": video_id,
+                "chunks_created": len(chunks),
+                "message": "Video already ingested. Using cached chunks."
+            }
+
         transcript = get_transcript(request.youtube_url)
 
-        chunks = chunk_transcript(transcript)
+        chunks = chunk_transcript(
+            transcript=transcript,
+            chunk_size=700,
+            chunk_overlap=120
+        )
 
         texts = [chunk["text"] for chunk in chunks]
 
@@ -75,7 +100,13 @@ def ingest_video(request: IngestRequest):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": str(e),
+                "message": "Something went wrong while processing the request."
+            } 
+)
 
 
 @app.post("/ask")
@@ -122,6 +153,33 @@ def retrieve_only(request: RetrieveRequest):
             "question": request.question,
             "top_k": request.top_k,
             "chunks": chunks
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+@app.delete("/cache/answers")
+def clear_all_answer_cache():
+    try:
+        deleted_count = clear_answer_cache()
+
+        return {
+            "deleted_count": deleted_count,
+            "message": "Semantic answer cache cleared."
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/cache/answers/{video_id}")
+def clear_video_answer_cache(video_id: str):
+    try:
+        deleted_count = clear_answer_cache(video_id)
+
+        return {
+            "video_id": video_id,
+            "deleted_count": deleted_count,
+            "message": "Semantic answer cache cleared for video."
         }
 
     except Exception as e:
