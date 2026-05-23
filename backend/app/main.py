@@ -1,5 +1,8 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel 
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+import os 
 
 from .transcript import get_transcript, extract_video_id
 from .chunking import chunk_transcript
@@ -9,6 +12,14 @@ from .vector_store import store_chunks, get_video_chunks, retrieve_chunks
 from .reranker import rerank_chunks
 
 app = FastAPI(title="YouTube Video Chatbot")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For development, allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class IngestRequest(BaseModel):
@@ -30,7 +41,7 @@ class RetrieveRequest(BaseModel):
     question: str
     top_k: int = 5
 
-@app.get("/")
+@app.get("/health")
 def health_check():
     return {
         "status": "ok",
@@ -143,3 +154,6 @@ def retrieve_reranked(request: RetrieveRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend"))
+app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")

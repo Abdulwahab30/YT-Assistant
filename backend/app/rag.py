@@ -73,20 +73,25 @@ def answer_question(video_id: str, question: str) -> dict:
     context = build_context(retrieved_chunks)
 
     prompt = f"""
-You are a helpful assistant answering questions about a YouTube video.
+    You are a YouTube video question-answering assistant.
 
-Use only the transcript context below to answer the question.
-If the answer is not present in the context, say:
-"I could not find that in the video."
+    You must answer using ONLY the transcript context provided below.
 
-Include timestamps when useful.
+    Rules:
+    1. If the answer is present in the context, answer clearly and concisely.
+    2. Mention only 1–2 timestamps in the answer, and only when they directly support the answer.
+    3. If the answer is not present in the context, say:
+    "I could not find that in the video."
+    4. Do not use outside knowledge.
+    5. Do not guess.
+    6. Do not mention information that is not supported by the transcript context.
 
-Transcript context:
-{context}
+    Transcript context:
+    {context}
 
-Question:
-{question}
-"""
+    User question:
+    {question}
+    """
 
     response = client.chat.completions.create(
         model=CHAT_MODEL,
@@ -105,9 +110,11 @@ Question:
 
     answer = response.choices[0].message.content
 
+    MAX_VISIBLE_SOURCES = 3
+
     sources = []
 
-    for chunk in retrieved_chunks:
+    for chunk in retrieved_chunks[:MAX_VISIBLE_SOURCES]:
         metadata = chunk["metadata"]
         start_seconds = int(metadata["start_time"])
 
@@ -117,9 +124,8 @@ Question:
             "start": format_timestamp(metadata["start_time"]),
             "end": format_timestamp(metadata["end_time"]),
             "youtube_url": f"https://www.youtube.com/watch?v={video_id}&t={start_seconds}s",
-            "distance": chunk.get("distance"),
             "rerank_score": chunk.get("rerank_score"),
-            "text": chunk["text"]
+            "text_preview": chunk["text"][:300] + "..."
         })
 
     return {
