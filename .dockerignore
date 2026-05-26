@@ -1,0 +1,34 @@
+# Git
+.git
+.gitignore
+
+# Python virtual environment (NEVER copy into Docker)
+backend/.venv
+.venv
+
+# Conda environments (the container creates its own)
+backend/envs
+envs
+
+# Python bytecode cache
+__pycache__
+*.pyc
+*.pyo
+
+# Local database files (persist via Docker volumes, not baked into the image)
+backend/chroma_db
+chroma_db
+backend/*.db
+
+# Environment secrets (mount these at runtime, never bake them in)
+backend/.env
+.env
+
+# Local editor & OS files
+.idea
+.vscode
+*.DS_Store
+Thumbs.db
+
+# Firebase service account key (mount at runtime via -v flag)
+backend/firebase-service-account.json

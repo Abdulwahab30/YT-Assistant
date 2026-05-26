@@ -25,6 +25,23 @@ def extract_video_id(youtube_url: str) -> str:
     raise ValueError("Invalid YouTube URL")
 
 
+def get_youtube_title(video_id: str) -> str:
+    import urllib.request
+    import re
+    url = f"https://www.youtube.com/watch?v={video_id}"
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response:
+            html = response.read().decode('utf-8')
+            match = re.search(r'<title>(.*?)</title>', html)
+            if match:
+                title = match.group(1)
+                return title.replace(" - YouTube", "")
+    except Exception:
+        pass
+    return "YouTube Video"
+
+
 @retry_external_call()
 def fetch_transcript_from_youtube(video_id: str) -> list[dict]:
     """

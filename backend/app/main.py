@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import os 
 
-from .transcript import get_transcript, extract_video_id
+from .transcript import get_transcript, extract_video_id, get_youtube_title
 from .chunking import chunk_transcript
 from .rag import answer_question
 from .embeddings import create_embedding, create_embeddings
@@ -17,12 +17,29 @@ from .vector_store import (
 from .reranker import rerank_chunks
 from .semantic_cache import clear_answer_cache
 
+from fastapi import FastAPI, HTTPException, Depends
+from .auth import get_current_user
 
 
+from .firestore_db import (
+    create_or_update_video,
+    get_video,
+    list_videos,
+    create_chat_session,
+    get_chat_session,
+    list_chat_sessions,
+    update_chat_session_title,
+    delete_chat_session,
+    save_chat_message,
+    get_chat_messages,
+)
 
 
 
 app = FastAPI(title="YouTube Video Chatbot")
+
+
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -45,8 +62,18 @@ class IngestResponse(BaseModel):
 
 
 class AskRequest(BaseModel):
-    video_id: str
+    session_id: str
     question: str
+
+
+class CreateSessionRequest(BaseModel):
+    youtube_url: str
+    force: bool = False
+
+
+class UpdateSessionTitleRequest(BaseModel):
+    title: str
+
 
 class RetrieveRequest(BaseModel):
     video_id: str
@@ -62,17 +89,21 @@ def health_check():
 
 
 @app.post("/ingest", response_model=IngestResponse)
-def ingest_video(request: IngestRequest):
+def ingest_video(
+    request: IngestRequest,
+    current_user: dict = Depends(get_current_user)
+):
     try:
+        user_id = current_user["uid"]
         video_id = extract_video_id(request.youtube_url)
 
-        if video_exists(video_id) and not request.force:
-            chunks = get_video_chunks(video_id)
+        if video_exists(user_id, video_id) and not request.force:
+            chunks = get_video_chunks(user_id, video_id)
 
             return {
                 "video_id": video_id,
                 "chunks_created": len(chunks),
-                "message": "Video already ingested. Using cached chunks."
+                "message": "Video already ingested for this user. Using cached chunks."
             }
 
         transcript = get_transcript(request.youtube_url)
@@ -84,10 +115,10 @@ def ingest_video(request: IngestRequest):
         )
 
         texts = [chunk["text"] for chunk in chunks]
-
         embeddings = create_embeddings(texts)
 
         store_chunks(
+            user_id=user_id,
             video_id=video_id,
             chunks=chunks,
             embeddings=embeddings
@@ -100,33 +131,74 @@ def ingest_video(request: IngestRequest):
         }
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": str(e),
-                "message": "Something went wrong while processing the request."
-            } 
-)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
 
 
 @app.post("/ask")
-def ask_question(request: AskRequest):
+def ask_question_route(
+    request: AskRequest,
+    current_user: dict = Depends(get_current_user)
+):
     try:
+        user_id = current_user["uid"]
+
+        session = get_chat_session(
+            user_id=user_id,
+            session_id=request.session_id
+        )
+
+        if not session:
+            raise HTTPException(status_code=404, detail="Chat session not found")
+
+        save_chat_message(
+            user_id=user_id,
+            session_id=session["id"],
+            video_id=session["video_id"],
+            role="user",
+            content=request.question
+        )
+
         result = answer_question(
-            video_id=request.video_id,
+            user_id=user_id,
+            video_id=session["video_id"],
             question=request.question
         )
 
-        return result
+        save_chat_message(
+            user_id=user_id,
+            session_id=session["id"],
+            video_id=session["video_id"],
+            role="assistant",
+            content=result["answer"]
+        )
+
+        return {
+            **result,
+            "session_id": session["id"]
+        }
+
+    except HTTPException:
+        raise
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/videos/{video_id}/chunks")
-def list_video_chunks(video_id: str):
+def list_video_chunks(
+    video_id: str,
+    current_user: dict = Depends(get_current_user)
+):
     try:
-        chunks = get_video_chunks(video_id)
+        chunks = get_video_chunks(
+            user_id=current_user["uid"],
+            video_id=video_id
+        )
 
         return {
             "video_id": video_id,
@@ -138,11 +210,15 @@ def list_video_chunks(video_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/retrieve")
-def retrieve_only(request: RetrieveRequest):
+def retrieve_only(
+    request: RetrieveRequest,
+    current_user: dict = Depends(get_current_user)
+):
     try:
         question_embedding = create_embedding(request.question)
 
         chunks = retrieve_chunks(
+            user_id=current_user["uid"],
             question_embedding=question_embedding,
             video_id=request.video_id,
             top_k=request.top_k
@@ -157,6 +233,8 @@ def retrieve_only(request: RetrieveRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.delete("/cache/answers")
 def clear_all_answer_cache():
     try:
@@ -186,11 +264,15 @@ def clear_video_answer_cache(video_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/retrieve-reranked")
-def retrieve_reranked(request: RetrieveRequest):
+def retrieve_reranked(
+    request: RetrieveRequest,
+    current_user: dict = Depends(get_current_user)
+):
     try:
         question_embedding = create_embedding(request.question)
 
         initial_chunks = retrieve_chunks(
+            user_id=current_user["uid"],
             question_embedding=question_embedding,
             video_id=request.video_id,
             top_k=15
@@ -209,6 +291,238 @@ def retrieve_reranked(request: RetrieveRequest):
             "reranked_top_k": request.top_k,
             "chunks": reranked_chunks
         }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/me")
+def get_me(current_user: dict = Depends(get_current_user)):
+    return {
+        "user": current_user
+    }
+
+
+# @app.get("/chat/history/{video_id}")
+# def read_chat_history(
+#     video_id: str,
+#     current_user: dict = Depends(get_current_user)
+# ):
+#     try:
+#         history = get_chat_history(
+#             user_id=current_user["uid"],
+#             video_id=video_id
+#         )
+
+#         return {
+#             "video_id": video_id,
+#             "messages": history
+#         }
+
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/chat/sessions")
+def create_session(
+    request: CreateSessionRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        user_id = current_user["uid"]
+        video_id = extract_video_id(request.youtube_url)
+
+        if video_exists(user_id, video_id) and not request.force:
+            chunks = get_video_chunks(user_id, video_id)
+        else:
+            transcript = get_transcript(request.youtube_url)
+
+            chunks = chunk_transcript(
+                transcript=transcript,
+                chunk_size=700,
+                chunk_overlap=120
+            )
+
+            texts = [chunk["text"] for chunk in chunks]
+            embeddings = create_embeddings(texts)
+
+            store_chunks(
+                user_id=user_id,
+                video_id=video_id,
+                chunks=chunks,
+                embeddings=embeddings
+            )
+
+        video_title = get_youtube_title(video_id)
+
+        create_or_update_video(
+            user_id=user_id,
+            video_id=video_id,
+            youtube_url=request.youtube_url,
+            chunks_count=len(chunks),
+            title=video_title,
+            processing_status="completed",
+        ) 
+
+        session = create_chat_session(
+            user_id=user_id,
+            video_id=video_id,
+            youtube_url=request.youtube_url,
+            video_title=video_title,
+            title="New Chat",
+            chunks_count=len(chunks),
+        )
+
+        return {
+            "session": session,
+            "message": "Chat session created successfully"
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/chat/sessions")
+def get_sessions(
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        sessions = list_chat_sessions(
+            user_id=current_user["uid"]
+        )
+
+        return {
+            "sessions": sessions
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/chat/sessions/{session_id}/messages")
+def get_session_messages(
+    session_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        user_id = current_user["uid"]
+
+        session = get_chat_session(
+            user_id=user_id,
+            session_id=session_id
+        )
+
+        if not session:
+            raise HTTPException(status_code=404, detail="Chat session not found")
+
+        messages = get_chat_messages(
+            user_id=user_id,
+            session_id=session_id
+        )
+
+        return {
+            "session": session,
+            "messages": messages
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.patch("/chat/sessions/{session_id}")
+def rename_session(
+    session_id: str,
+    request: UpdateSessionTitleRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        user_id = current_user["uid"]
+
+        session = get_chat_session(
+            user_id=user_id,
+            session_id=session_id
+        )
+
+        if not session:
+            raise HTTPException(status_code=404, detail="Chat session not found")
+
+        update_chat_session_title(
+            user_id=user_id,
+            session_id=session_id,
+            title=request.title
+        )
+
+        return {
+            "message": "Session title updated"
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/chat/sessions/{session_id}")
+def remove_session(
+    session_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        deleted = delete_chat_session(
+            user_id=current_user["uid"],
+            session_id=session_id
+        )
+
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Chat session not found")
+
+        return {
+            "message": "Session deleted"
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/videos")
+def get_user_videos(
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        videos = list_videos(current_user["uid"])
+
+        return {
+            "videos": videos
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/videos/{video_id}")
+def get_user_video(
+    video_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        video = get_video(
+            user_id=current_user["uid"],
+            video_id=video_id
+        )
+
+        if not video:
+            raise HTTPException(status_code=404, detail="Video not found")
+
+        return {
+            "video": video
+        }
+
+    except HTTPException:
+        raise
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -8,54 +8,44 @@ client = chromadb.PersistentClient(path=CHROMA_PATH)
 collection = client.get_or_create_collection(name=COLLECTION_NAME)
 
 
-def delete_video_chunks(video_id: str) -> None:
-    """
-    Deletes existing chunks for a video.
-    Useful before re-ingesting the same video.
-    """
+def user_video_filter(user_id: str, video_id: str) -> dict:
+    return {
+        "$and": [
+            {"user_id": user_id},
+            {"video_id": video_id}
+        ]
+    }
 
+
+def delete_video_chunks(user_id: str, video_id: str) -> None:
     existing = collection.get(
-        where={"video_id": video_id},
+        where=user_video_filter(user_id, video_id),
         include=[]
     )
 
     if existing and existing.get("ids"):
-        collection.delete(
-            ids=existing["ids"]
-        )
+        collection.delete(ids=existing["ids"])
 
-        
-def video_exists(video_id: str) -> bool:
-    """
-    Checks whether chunks already exist for a video.
-    """
-    results = collection.get(
-        where={"video_id": video_id},
-        include=[],
-        limit=1
-    )
 
-    return bool(results.get("ids"))
-
-def store_chunks(video_id: str, chunks: list[dict], embeddings: list[list[float]]) -> None:
-    """
-    Stores transcript chunks in Chroma.
-
-    If the same video is ingested again, old chunks are removed first.
-    """
-
-    delete_video_chunks(video_id)
+def store_chunks(
+    user_id: str,
+    video_id: str,
+    chunks: list[dict],
+    embeddings: list[list[float]]
+) -> None:
+    delete_video_chunks(user_id, video_id)
 
     ids = []
     documents = []
     metadatas = []
 
     for chunk, embedding in zip(chunks, embeddings):
-        chunk_id = f"{video_id}_{chunk['chunk_index']}"
+        chunk_id = f"{user_id}_{video_id}_{chunk['chunk_index']}"
 
         ids.append(chunk_id)
         documents.append(chunk["text"])
         metadatas.append({
+            "user_id": user_id,
             "video_id": video_id,
             "chunk_index": chunk["chunk_index"],
             "start_time": chunk["start_time"],
@@ -71,18 +61,15 @@ def store_chunks(video_id: str, chunks: list[dict], embeddings: list[list[float]
 
 
 def retrieve_chunks(
+    user_id: str,
     question_embedding: list[float],
     video_id: str,
     top_k: int = 5
 ) -> list[dict]:
-    """
-    Retrieves the most relevant chunks for a question.
-    """
-
     results = collection.query(
         query_embeddings=[question_embedding],
         n_results=top_k,
-        where={"video_id": video_id}
+        where=user_video_filter(user_id, video_id)
     )
 
     retrieved = []
@@ -101,14 +88,9 @@ def retrieve_chunks(
     return retrieved
 
 
-def get_video_chunks(video_id: str) -> list[dict]:
-    """
-    Returns all stored chunks for a video.
-    Useful for debugging chunk quality.
-    """
-
+def get_video_chunks(user_id: str, video_id: str) -> list[dict]:
     results = collection.get(
-        where={"video_id": video_id},
+        where=user_video_filter(user_id, video_id),
         include=["documents", "metadatas"]
     )
 
@@ -126,3 +108,13 @@ def get_video_chunks(video_id: str) -> list[dict]:
     chunks.sort(key=lambda item: item["metadata"]["chunk_index"])
 
     return chunks
+
+
+def video_exists(user_id: str, video_id: str) -> bool:
+    results = collection.get(
+        where=user_video_filter(user_id, video_id),
+        include=[],
+        limit=1
+    )
+
+    return bool(results.get("ids"))

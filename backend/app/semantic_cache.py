@@ -5,21 +5,23 @@ import chromadb
 
 
 CHROMA_PATH = "chroma_db"
-ANSWER_CACHE_COLLECTION_NAME = "youtube_answer_cache"
+ANSWER_CACHE_COLLECTION_NAME = "youtube_answer_cache_cosine"
 
 client = chromadb.PersistentClient(path=CHROMA_PATH)
 
 answer_cache_collection = client.get_or_create_collection(
-    name=ANSWER_CACHE_COLLECTION_NAME
+    name=ANSWER_CACHE_COLLECTION_NAME,
+    metadata={"hnsw:space": "cosine"}
 )
 
 
-SEMANTIC_CACHE_DISTANCE_THRESHOLD = 0.15
+SEMANTIC_CACHE_DISTANCE_THRESHOLD = 0.10
 SEMANTIC_CACHE_TOP_K = 1
-PIPELINE_VERSION = "rag-v1"
+PIPELINE_VERSION = "rag-v2"
 PROMPT_VERSION = "prompt-v1"
 
 def get_cached_answer(
+    user_id: str,
     video_id: str,
     question_embedding: list[float],
     distance_threshold: float = SEMANTIC_CACHE_DISTANCE_THRESHOLD
@@ -36,11 +38,12 @@ def get_cached_answer(
         n_results=SEMANTIC_CACHE_TOP_K,
         where={
             "$and": [
+                {"user_id": user_id},
                 {"video_id": video_id},
                 {"pipeline_version": PIPELINE_VERSION},
                 {"prompt_version": PROMPT_VERSION}
             ]
-}
+        }
     )
 
     ids = results.get("ids", [[]])[0]
@@ -77,6 +80,7 @@ def get_cached_answer(
 
 
 def save_answer_to_cache(
+    user_id: str,
     video_id: str,
     question: str,
     question_embedding: list[float],
@@ -87,17 +91,17 @@ def save_answer_to_cache(
     Saves generated answer into semantic cache.
     """
 
-    cache_id = f"{video_id}_{uuid.uuid4()}"
+    cache_id = f"{user_id}_{video_id}_{uuid.uuid4()}"
 
     metadata = {
+        "user_id": user_id,
         "video_id": video_id,
         "question": question,
         "sources_json": json.dumps(sources),
         "created_at": int(time.time()),
         "pipeline_version": PIPELINE_VERSION,
         "prompt_version": PROMPT_VERSION
-    }
-
+        }
     answer_cache_collection.add(
         ids=[cache_id],
         embeddings=[question_embedding],

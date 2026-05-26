@@ -1,0 +1,992 @@
+[
+  {
+    "text": "[Music]",
+    "start": 0.11,
+    "duration": 8.69
+  },
+  {
+    "text": "Okay. Um, bring up everything you have",
+    "start": 10.4,
+    "duration": 6.359
+  },
+  {
+    "text": "on Spider-Man.",
+    "start": 13.44,
+    "duration": 3.319
+  },
+  {
+    "text": "Yeah. Open that. Okay. No, no, no.",
+    "start": 22.0,
+    "duration": 5.24
+  },
+  {
+    "text": "What?",
+    "start": 29.92,
+    "duration": 4.0
+  },
+  {
+    "text": "Nothing. I am just in awe about how",
+    "start": 31.76,
+    "duration": 4.16
+  },
+  {
+    "text": "quickly you could find the exact chunks",
+    "start": 33.92,
+    "duration": 4.959
+  },
+  {
+    "text": "of data about Spider-Man with such a",
+    "start": 35.92,
+    "duration": 5.36
+  },
+  {
+    "text": "simple prompt. And a matter of fact, I",
+    "start": 38.879,
+    "duration": 3.761
+  },
+  {
+    "text": "would like to take this opportunity to",
+    "start": 41.28,
+    "duration": 3.04
+  },
+  {
+    "text": "explain to our friends here the",
+    "start": 42.64,
+    "duration": 4.64
+  },
+  {
+    "text": "importance of chunking data.",
+    "start": 44.32,
+    "duration": 4.64
+  },
+  {
+    "text": "If you are building LLM applications",
+    "start": 47.28,
+    "duration": 3.84
+  },
+  {
+    "text": "that interact with vector databases, one",
+    "start": 48.96,
+    "duration": 3.919
+  },
+  {
+    "text": "of the most crucial decisions you will",
+    "start": 51.12,
+    "duration": 3.759
+  },
+  {
+    "text": "make is to how to break it down your tax",
+    "start": 52.879,
+    "duration": 4.721
+  },
+  {
+    "text": "data into manageable pieces. This",
+    "start": 54.879,
+    "duration": 4.48
+  },
+  {
+    "text": "process is called chunking and it",
+    "start": 57.6,
+    "duration": 3.759
+  },
+  {
+    "text": "directly affects the quality, accuracy",
+    "start": 59.359,
+    "duration": 3.921
+  },
+  {
+    "text": "and relevance of your applications",
+    "start": 61.359,
+    "duration": 4.561
+  },
+  {
+    "text": "responses. In this video, I will walk",
+    "start": 63.28,
+    "duration": 4.879
+  },
+  {
+    "text": "you through and what chunking is, why",
+    "start": 65.92,
+    "duration": 3.519
+  },
+  {
+    "text": "does it matter and the different",
+    "start": 68.159,
+    "duration": 3.041
+  },
+  {
+    "text": "strategies you can implement to optimize",
+    "start": 69.439,
+    "duration": 4.641
+  },
+  {
+    "text": "your LLM applications. Are you ready for",
+    "start": 71.2,
+    "duration": 6.72
+  },
+  {
+    "text": "this? Let's do it. So, what is chunking?",
+    "start": 74.08,
+    "duration": 5.679
+  },
+  {
+    "text": "Chunking is simply breaking down large",
+    "start": 77.92,
+    "duration": 4.08
+  },
+  {
+    "text": "pieces of text into smaller segments",
+    "start": 79.759,
+    "duration": 4.321
+  },
+  {
+    "text": "before embedding them and storing them",
+    "start": 82.0,
+    "duration": 4.96
+  },
+  {
+    "text": "into a vector database. But why people",
+    "start": 84.08,
+    "duration": 5.679
+  },
+  {
+    "text": "would do junk texts in the first place?",
+    "start": 86.96,
+    "duration": 4.4
+  },
+  {
+    "text": "The main reason is to ensure we're",
+    "start": 89.759,
+    "duration": 3.441
+  },
+  {
+    "text": "embedding pieces of context with minimal",
+    "start": 91.36,
+    "duration": 3.84
+  },
+  {
+    "text": "noise and maintaining semantic",
+    "start": 93.2,
+    "duration": 4.4
+  },
+  {
+    "text": "relevance. For example, in semantic",
+    "start": 95.2,
+    "duration": 4.0
+  },
+  {
+    "text": "search applications, a proper chunking",
+    "start": 97.6,
+    "duration": 3.6
+  },
+  {
+    "text": "ensures your search results accurately",
+    "start": 99.2,
+    "duration": 4.8
+  },
+  {
+    "text": "capture the what users are looking for.",
+    "start": 101.2,
+    "duration": 5.199
+  },
+  {
+    "text": "In conversational agents, good chunking",
+    "start": 104.0,
+    "duration": 4.479
+  },
+  {
+    "text": "ensures the retrieved context applies to",
+    "start": 106.399,
+    "duration": 4.161
+  },
+  {
+    "text": "the user's query and fits within the",
+    "start": 108.479,
+    "duration": 5.441
+  },
+  {
+    "text": "token limitation of your LLM.",
+    "start": 110.56,
+    "duration": 5.28
+  },
+  {
+    "text": "One very important aspect to consider",
+    "start": 113.92,
+    "duration": 3.68
+  },
+  {
+    "text": "while you're embedding data is the",
+    "start": 115.84,
+    "duration": 4.08
+  },
+  {
+    "text": "length of content being embedded because",
+    "start": 117.6,
+    "duration": 4.479
+  },
+  {
+    "text": "it significantly affect the created",
+    "start": 119.92,
+    "duration": 5.04
+  },
+  {
+    "text": "factors. Therefore, it is important to",
+    "start": 122.079,
+    "duration": 5.921
+  },
+  {
+    "text": "talk about embedding short versus long",
+    "start": 124.96,
+    "duration": 6.079
+  },
+  {
+    "text": "content. When embedding short content",
+    "start": 128.0,
+    "duration": 5.12
+  },
+  {
+    "text": "like sentences, here's what you need to",
+    "start": 131.039,
+    "duration": 3.681
+  },
+  {
+    "text": "consider.",
+    "start": 133.12,
+    "duration": 4.08
+  },
+  {
+    "text": "Vectors, they focus on very specific",
+    "start": 134.72,
+    "duration": 4.239
+  },
+  {
+    "text": "meanings.",
+    "start": 137.2,
+    "duration": 5.6
+  },
+  {
+    "text": "They excel at precise matching. However,",
+    "start": 138.959,
+    "duration": 6.961
+  },
+  {
+    "text": "it may miss broader context.",
+    "start": 142.8,
+    "duration": 5.6
+  },
+  {
+    "text": "With longer context like paragraphs,",
+    "start": 145.92,
+    "duration": 5.12
+  },
+  {
+    "text": "here's what you need to consider.",
+    "start": 148.4,
+    "duration": 5.04
+  },
+  {
+    "text": "Embattings capture overall themes and",
+    "start": 151.04,
+    "duration": 4.0
+  },
+  {
+    "text": "relationships.",
+    "start": 153.44,
+    "duration": 3.519
+  },
+  {
+    "text": "It provides more comprehensive",
+    "start": 155.04,
+    "duration": 4.08
+  },
+  {
+    "text": "representation.",
+    "start": 156.959,
+    "duration": 5.121
+  },
+  {
+    "text": "However, it may delude the significancy",
+    "start": 159.12,
+    "duration": 6.0
+  },
+  {
+    "text": "of specific details.",
+    "start": 162.08,
+    "duration": 5.12
+  },
+  {
+    "text": "When it comes to size, here's a tip for",
+    "start": 165.12,
+    "duration": 4.72
+  },
+  {
+    "text": "you. Your query length should ideally",
+    "start": 167.2,
+    "duration": 5.2
+  },
+  {
+    "text": "match with your chunk size. Short",
+    "start": 169.84,
+    "duration": 5.039
+  },
+  {
+    "text": "queries work better with sentence level",
+    "start": 172.4,
+    "duration": 5.44
+  },
+  {
+    "text": "embeddings while longer, more complex",
+    "start": 174.879,
+    "duration": 5.921
+  },
+  {
+    "text": "queries align better with paragraph",
+    "start": 177.84,
+    "duration": 5.52
+  },
+  {
+    "text": "level embeddings.",
+    "start": 180.8,
+    "duration": 4.719
+  },
+  {
+    "text": "Before choosing a chunking strategy,",
+    "start": 183.36,
+    "duration": 3.84
+  },
+  {
+    "text": "these are the factors that you need to",
+    "start": 185.519,
+    "duration": 4.72
+  },
+  {
+    "text": "consider. Number one, consider the",
+    "start": 187.2,
+    "duration": 5.36
+  },
+  {
+    "text": "content nature. Are you working with",
+    "start": 190.239,
+    "duration": 4.961
+  },
+  {
+    "text": "long documents like research papers? Or",
+    "start": 192.56,
+    "duration": 4.08
+  },
+  {
+    "text": "perhaps you are working with short",
+    "start": 195.2,
+    "duration": 4.319
+  },
+  {
+    "text": "textes like tweets.",
+    "start": 196.64,
+    "duration": 5.36
+  },
+  {
+    "text": "Number two, consider the embedding model",
+    "start": 199.519,
+    "duration": 4.481
+  },
+  {
+    "text": "characteristics. Different models",
+    "start": 202.0,
+    "duration": 3.76
+  },
+  {
+    "text": "perform optionally with different chunk",
+    "start": 204.0,
+    "duration": 4.0
+  },
+  {
+    "text": "sizes. For instance, sentence",
+    "start": 205.76,
+    "duration": 4.479
+  },
+  {
+    "text": "transformer modules work well on",
+    "start": 208.0,
+    "duration": 5.04
+  },
+  {
+    "text": "individual sentences. Meanwhile, text",
+    "start": 210.239,
+    "duration": 5.92
+  },
+  {
+    "text": "embedding ADA 002 performs better with",
+    "start": 213.04,
+    "duration": 9.04
+  },
+  {
+    "text": "256 or 512 token chunks. Number three,",
+    "start": 216.159,
+    "duration": 8.961
+  },
+  {
+    "text": "consider the query expectations.",
+    "start": 222.08,
+    "duration": 5.84
+  },
+  {
+    "text": "Will your users ask short, very specific",
+    "start": 225.12,
+    "duration": 4.8
+  },
+  {
+    "text": "questions or perhaps they're asking more",
+    "start": 227.92,
+    "duration": 4.48
+  },
+  {
+    "text": "complex ones?",
+    "start": 229.92,
+    "duration": 4.399
+  },
+  {
+    "text": "Number four, also consider the",
+    "start": 232.4,
+    "duration": 4.88
+  },
+  {
+    "text": "application purpose. Will you use the",
+    "start": 234.319,
+    "duration": 5.441
+  },
+  {
+    "text": "retrieved results? You are going to use",
+    "start": 237.28,
+    "duration": 4.879
+  },
+  {
+    "text": "them for semantic search, going to use",
+    "start": 239.76,
+    "duration": 4.64
+  },
+  {
+    "text": "them for question answering, or you're",
+    "start": 242.159,
+    "duration": 5.28
+  },
+  {
+    "text": "going to use them for summarization.",
+    "start": 244.4,
+    "duration": 5.6
+  },
+  {
+    "text": "Answering these questions will guide you",
+    "start": 247.439,
+    "duration": 4.8
+  },
+  {
+    "text": "toward the right chunking approach for",
+    "start": 250.0,
+    "duration": 4.799
+  },
+  {
+    "text": "your use case.",
+    "start": 252.239,
+    "duration": 5.041
+  },
+  {
+    "text": "Let's now talk about the chunking",
+    "start": 254.799,
+    "duration": 4.801
+  },
+  {
+    "text": "approaches you can use in your",
+    "start": 257.28,
+    "duration": 4.96
+  },
+  {
+    "text": "applications. Let's start with the fixed",
+    "start": 259.6,
+    "duration": 5.2
+  },
+  {
+    "text": "size chunking. This is the most",
+    "start": 262.24,
+    "duration": 4.48
+  },
+  {
+    "text": "straightforward approach. You simply",
+    "start": 264.8,
+    "duration": 4.32
+  },
+  {
+    "text": "decide how many tokens each chunk should",
+    "start": 266.72,
+    "duration": 4.56
+  },
+  {
+    "text": "contain and optionally you can add an",
+    "start": 269.12,
+    "duration": 4.96
+  },
+  {
+    "text": "overlap between chunks to preserve",
+    "start": 271.28,
+    "duration": 4.639
+  },
+  {
+    "text": "context.",
+    "start": 274.08,
+    "duration": 4.24
+  },
+  {
+    "text": "Fixed side chunking is computationally",
+    "start": 275.919,
+    "duration": 4.401
+  },
+  {
+    "text": "inexpensive and works well for most",
+    "start": 278.32,
+    "duration": 4.72
+  },
+  {
+    "text": "common use cases.",
+    "start": 280.32,
+    "duration": 4.879
+  },
+  {
+    "text": "Another approach is contextaware",
+    "start": 283.04,
+    "duration": 4.719
+  },
+  {
+    "text": "chunking. This method takes advantage of",
+    "start": 285.199,
+    "duration": 5.44
+  },
+  {
+    "text": "the natural structury of your content.",
+    "start": 287.759,
+    "duration": 5.121
+  },
+  {
+    "text": "For example, you can implement sentence",
+    "start": 290.639,
+    "duration": 4.961
+  },
+  {
+    "text": "level splitting. Many embedding models",
+    "start": 292.88,
+    "duration": 4.48
+  },
+  {
+    "text": "are optimized for sentence level",
+    "start": 295.6,
+    "duration": 4.64
+  },
+  {
+    "text": "content. On the application coding side,",
+    "start": 297.36,
+    "duration": 4.8
+  },
+  {
+    "text": "frameworks like link chain provide",
+    "start": 300.24,
+    "duration": 6.16
+  },
+  {
+    "text": "integrations with NLP libraries.",
+    "start": 302.16,
+    "duration": 6.56
+  },
+  {
+    "text": "You can also leverage recursive",
+    "start": 306.4,
+    "duration": 4.56
+  },
+  {
+    "text": "chunking. Recursive chunkers",
+    "start": 308.72,
+    "duration": 5.199
+  },
+  {
+    "text": "intelligently divide text using a set of",
+    "start": 310.96,
+    "duration": 5.84
+  },
+  {
+    "text": "separators until they reach the desired",
+    "start": 313.919,
+    "duration": 6.801
+  },
+  {
+    "text": "chunk size. Another approach for",
+    "start": 316.8,
+    "duration": 5.6
+  },
+  {
+    "text": "structured content like markdown or",
+    "start": 320.72,
+    "duration": 4.64
+  },
+  {
+    "text": "latex, you can leverage specialized",
+    "start": 322.4,
+    "duration": 5.359
+  },
+  {
+    "text": "splitters because of the uniqueness of",
+    "start": 325.36,
+    "duration": 4.32
+  },
+  {
+    "text": "the structury of the content. This",
+    "start": 327.759,
+    "duration": 4.88
+  },
+  {
+    "text": "approach is known as specialized",
+    "start": 329.68,
+    "duration": 4.72
+  },
+  {
+    "text": "chunking.",
+    "start": 332.639,
+    "duration": 4.161
+  },
+  {
+    "text": "Finally, you can implement semantic",
+    "start": 334.4,
+    "duration": 5.12
+  },
+  {
+    "text": "chunking to identify natural topic",
+    "start": 336.8,
+    "duration": 5.52
+  },
+  {
+    "text": "boundaries. This produces chunks that",
+    "start": 339.52,
+    "duration": 5.519
+  },
+  {
+    "text": "maintain thematic coherence rather than",
+    "start": 342.32,
+    "duration": 5.04
+  },
+  {
+    "text": "arbitrary token counts. As you can",
+    "start": 345.039,
+    "duration": 4.481
+  },
+  {
+    "text": "imagine, this approach is a bit more",
+    "start": 347.36,
+    "duration": 4.559
+  },
+  {
+    "text": "computationally expensive when compared",
+    "start": 349.52,
+    "duration": 5.28
+  },
+  {
+    "text": "to the other approaches.",
+    "start": 351.919,
+    "duration": 4.641
+  },
+  {
+    "text": "Now that we've discussed the chunking",
+    "start": 354.8,
+    "duration": 4.08
+  },
+  {
+    "text": "approaches you can use, let's talk about",
+    "start": 356.56,
+    "duration": 5.04
+  },
+  {
+    "text": "how you can decise the optional chunk",
+    "start": 358.88,
+    "duration": 5.12
+  },
+  {
+    "text": "size. As you can imagine, this is going",
+    "start": 361.6,
+    "duration": 4.24
+  },
+  {
+    "text": "to be one of the most important tasks",
+    "start": 364.0,
+    "duration": 4.56
+  },
+  {
+    "text": "for your projects. To determine the best",
+    "start": 365.84,
+    "duration": 4.479
+  },
+  {
+    "text": "chunk size for your application, you",
+    "start": 368.56,
+    "duration": 5.12
+  },
+  {
+    "text": "should follow these three steps.",
+    "start": 370.319,
+    "duration": 6.641
+  },
+  {
+    "text": "First pre-process your data by removing",
+    "start": 373.68,
+    "duration": 5.6
+  },
+  {
+    "text": "all the noise and irrelevant content",
+    "start": 376.96,
+    "duration": 5.76
+  },
+  {
+    "text": "from it. Second, you should select a",
+    "start": 379.28,
+    "duration": 6.4
+  },
+  {
+    "text": "chunk sizes and a range of them to test",
+    "start": 382.72,
+    "duration": 4.96
+  },
+  {
+    "text": "basin on your content type and your",
+    "start": 385.68,
+    "duration": 4.639
+  },
+  {
+    "text": "embedding model. First, you have to try",
+    "start": 387.68,
+    "duration": 7.12
+  },
+  {
+    "text": "smaller sizes like 128 until 256 tokens",
+    "start": 390.319,
+    "duration": 6.32
+  },
+  {
+    "text": "to accommodate more granular",
+    "start": 394.8,
+    "duration": 4.16
+  },
+  {
+    "text": "information. And perhaps you should try",
+    "start": 396.639,
+    "duration": 6.721
+  },
+  {
+    "text": "larger sizes for 512 until 1,024 tokens",
+    "start": 398.96,
+    "duration": 8.48
+  },
+  {
+    "text": "to accommodate more context.",
+    "start": 403.36,
+    "duration": 6.16
+  },
+  {
+    "text": "And the third step is to evaluate the",
+    "start": 407.44,
+    "duration": 3.44
+  },
+  {
+    "text": "performance. You should create",
+    "start": 409.52,
+    "duration": 3.92
+  },
+  {
+    "text": "embeddings using different chunk sizes,",
+    "start": 410.88,
+    "duration": 4.879
+  },
+  {
+    "text": "store them into a vector database, and",
+    "start": 413.44,
+    "duration": 4.64
+  },
+  {
+    "text": "then run representative queries to",
+    "start": 415.759,
+    "duration": 4.56
+  },
+  {
+    "text": "evaluate their performance. In this",
+    "start": 418.08,
+    "duration": 4.64
+  },
+  {
+    "text": "evaluation, you should compare metrics",
+    "start": 420.319,
+    "duration": 6.16
+  },
+  {
+    "text": "like relevancy, accuracy, and retrieval",
+    "start": 422.72,
+    "duration": 5.28
+  },
+  {
+    "text": "speed.",
+    "start": 426.479,
+    "duration": 4.0
+  },
+  {
+    "text": "While this process look tedious and if",
+    "start": 428.0,
+    "duration": 4.639
+  },
+  {
+    "text": "you do it manually, you can automate all",
+    "start": 430.479,
+    "duration": 4.481
+  },
+  {
+    "text": "of this by creating task and workflows",
+    "start": 432.639,
+    "duration": 4.721
+  },
+  {
+    "text": "with frameworks like lingraph to handle",
+    "start": 434.96,
+    "duration": 5.28
+  },
+  {
+    "text": "this evaluation process across different",
+    "start": 437.36,
+    "duration": 5.04
+  },
+  {
+    "text": "chunking parameters.",
+    "start": 440.24,
+    "duration": 4.64
+  },
+  {
+    "text": "To wrap up, chunking is a critical but",
+    "start": 442.4,
+    "duration": 4.239
+  },
+  {
+    "text": "often overlook aspect of building",
+    "start": 444.88,
+    "duration": 3.84
+  },
+  {
+    "text": "effective LLM applications with vector",
+    "start": 446.639,
+    "duration": 4.081
+  },
+  {
+    "text": "databases. This is what you should",
+    "start": 448.72,
+    "duration": 4.319
+  },
+  {
+    "text": "always remember.",
+    "start": 450.72,
+    "duration": 5.44
+  },
+  {
+    "text": "There's no oneizefits-all solution.",
+    "start": 453.039,
+    "duration": 6.0
+  },
+  {
+    "text": "Consider your specific content, language",
+    "start": 456.16,
+    "duration": 5.84
+  },
+  {
+    "text": "model, and use case. Match the chunk",
+    "start": 459.039,
+    "duration": 6.401
+  },
+  {
+    "text": "size to the user squares expectations.",
+    "start": 462.0,
+    "duration": 5.759
+  },
+  {
+    "text": "Be familiar with the multiple chunking",
+    "start": 465.44,
+    "duration": 5.199
+  },
+  {
+    "text": "approaches that are available.",
+    "start": 467.759,
+    "duration": 4.961
+  },
+  {
+    "text": "Don't be afraid to experiment with other",
+    "start": 470.639,
+    "duration": 4.96
+  },
+  {
+    "text": "approaches if you feel needed.",
+    "start": 472.72,
+    "duration": 4.4
+  },
+  {
+    "text": "The right chunking approach will",
+    "start": 475.599,
+    "duration": 3.44
+  },
+  {
+    "text": "dramatically improve the relevancy and",
+    "start": 477.12,
+    "duration": 3.84
+  },
+  {
+    "text": "quality of your LLM applications,",
+    "start": 479.039,
+    "duration": 3.84
+  },
+  {
+    "text": "creating a better experience for your",
+    "start": 480.96,
+    "duration": 4.639
+  },
+  {
+    "text": "users who will benefit from more",
+    "start": 482.879,
+    "duration": 5.04
+  },
+  {
+    "text": "accurate results.",
+    "start": 485.599,
+    "duration": 4.16
+  },
+  {
+    "text": "Thanks for watching and if you find this",
+    "start": 487.919,
+    "duration": 3.68
+  },
+  {
+    "text": "content helpful, please hit the like",
+    "start": 489.759,
+    "duration": 3.84
+  },
+  {
+    "text": "button. Also, please consider",
+    "start": 491.599,
+    "duration": 3.761
+  },
+  {
+    "text": "subscribing to this channel for more",
+    "start": 493.599,
+    "duration": 4.16
+  },
+  {
+    "text": "content about building effective AI",
+    "start": 495.36,
+    "duration": 4.36
+  },
+  {
+    "text": "applications.",
+    "start": 497.759,
+    "duration": 8.8
+  },
+  {
+    "text": "[Music]",
+    "start": 499.72,
+    "duration": 6.839
+  }
+]

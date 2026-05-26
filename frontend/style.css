@@ -203,20 +203,67 @@ input[type="url"]:focus, input[type="text"]:focus {
 }
 
 .chat-header {
-    padding: 24px 32px;
+    padding: 16px 32px;
     border-bottom: 1px solid var(--border-color);
-    background: rgba(11, 15, 25, 0.8);
+    background: rgba(11, 15, 25, 0.85);
     backdrop-filter: blur(12px);
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .chat-header h2 {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     font-weight: 600;
+}
+
+.header-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+}
+
+.user-email-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-signout {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-signout:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
 }
 
 .chat-messages {

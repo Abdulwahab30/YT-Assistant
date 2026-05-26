@@ -1,0 +1,457 @@
+[
+  {
+    "text": "There's a fundamental truth about LLMs, large \nlanguage models. They are frozen in time. They  ",
+    "start": 0.32,
+    "duration": 9.44
+  },
+  {
+    "text": "know everything about our world up until \ntheir training cutoff date and absolutely  ",
+    "start": 9.76,
+    "duration": 6.24
+  },
+  {
+    "text": "nothing about what happened 5 minutes ago. Nor \ndo they know anything about your private data,  ",
+    "start": 16.0,
+    "duration": 5.68
+  },
+  {
+    "text": "your internal wikis, your proprietary codebase. And \nif we do want an LLM to know any of that stuff,  ",
+    "start": 21.68,
+    "duration": 6.56
+  },
+  {
+    "text": "well, we have to solve the problem of context \ninjection. How do we get the right data into the  ",
+    "start": 28.24,
+    "duration": 7.76
+  },
+  {
+    "text": "model at the right time? And there have been two \nvery different ways to handle this. Now, the first  ",
+    "start": 36.0,
+    "duration": 7.28
+  },
+  {
+    "text": "is really what we can think of as the engineering \napproach. It's RAG, retrieval augmented generation.  ",
+    "start": 43.28,
+    "duration": 8.72
+  },
+  {
+    "text": "So here we've got an LLM and we've also got an \ninput prompt from the user. Now ahead of time  ",
+    "start": 52.0,
+    "duration": 9.68
+  },
+  {
+    "text": "we take some of the documents that we want to give \nto this LLM. So these are documents that could be  ",
+    "start": 61.68,
+    "duration": 7.36
+  },
+  {
+    "text": "PDFs or code files or entire books and we chunk \nthem. We break them up into smaller chunks and  ",
+    "start": 69.04,
+    "duration": 10.16
+  },
+  {
+    "text": "we pass them through to an embedding model and \nthe embedding model takes those chunks and it  ",
+    "start": 79.2,
+    "duration": 8.16
+  },
+  {
+    "text": "turns them into vectors and those vectors are then \nstored in a dedicated vector database. Now when a  ",
+    "start": 87.36,
+    "duration": 11.44
+  },
+  {
+    "text": "user asks a question, it performs a semantic \nsearch to retrieve the most relevant chunks  ",
+    "start": 98.8,
+    "duration": 9.12
+  },
+  {
+    "text": "and then inject them into the context window. \nSo now the context window has the user prompt,  ",
+    "start": 107.92,
+    "duration": 6.64
+  },
+  {
+    "text": "but it also has all of these chunks that we have \ntaken from the vector database and together this  ",
+    "start": 114.56,
+    "duration": 8.8
+  },
+  {
+    "text": "forms the context window. Now this works but \nit does rely on something. It relies on the  ",
+    "start": 123.36,
+    "duration": 6.88
+  },
+  {
+    "text": "hope that your retrieval logic actually found \nthe right information in the vector database.  ",
+    "start": 130.24,
+    "duration": 5.36
+  },
+  {
+    "text": "Now the the second approach is really a bit more \nof a brute force approach and that one is called  ",
+    "start": 135.6,
+    "duration": 8.08
+  },
+  {
+    "text": "long context. Now this is really the model native \nsolution because you skip the database here and  ",
+    "start": 143.68,
+    "duration": 7.76
+  },
+  {
+    "text": "you skip the embedding model. All you do is you \ntake your documents and you just well you put them  ",
+    "start": 151.44,
+    "duration": 6.72
+  },
+  {
+    "text": "straight into the context window and then you let \nthe model's attention mechanism actually do the  ",
+    "start": 158.16,
+    "duration": 6.24
+  },
+  {
+    "text": "heavy lifting of finding the answer. Now for a \nlong time this kind of brute force method wasn't  ",
+    "start": 164.4,
+    "duration": 6.4
+  },
+  {
+    "text": "really much of an option because initially context \nwindows were tiny. Early LLMs had context windows  ",
+    "start": 170.8,
+    "duration": 7.92
+  },
+  {
+    "text": "that could maybe store what like 4K of tokens. \nYou couldn't fit a novel in there, let alone a  ",
+    "start": 178.72,
+    "duration": 7.52
+  },
+  {
+    "text": "corporate knowledge base. You basically had to use \nRAG. But today's models have much larger context  ",
+    "start": 186.24,
+    "duration": 8.0
+  },
+  {
+    "text": "windows. Some of them have, you know, a million \ntokens plus. And to put that into perspective,  ",
+    "start": 194.24,
+    "duration": 7.6
+  },
+  {
+    "text": "a million tokens is roughly 700,000 words. and you \ncould fit the entire Lord of the Rings series into  ",
+    "start": 201.84,
+    "duration": 7.28
+  },
+  {
+    "text": "the prompt and still have room for The Hobbit. So, \nthis massive jump in capacity forces us to ask a  ",
+    "start": 209.12,
+    "duration": 7.12
+  },
+  {
+    "text": "difficult question about our architecture. Because \nif we can simply command A, command C, command V,  ",
+    "start": 216.24,
+    "duration": 7.36
+  },
+  {
+    "text": "all of our documentation into the models context \nwindow, do we really need the overhead of  ",
+    "start": 223.6,
+    "duration": 5.6
+  },
+  {
+    "text": "embedding models and vector data stores? Is RAG\nbecoming an unnecessary complexity layer? Well,  ",
+    "start": 229.2,
+    "duration": 7.44
+  },
+  {
+    "text": "if we accept that we can fit whatever data we \nneed into the context window, then the argument  ",
+    "start": 236.64,
+    "duration": 6.8
+  },
+  {
+    "text": "for doing so basically boils down to one word, \nsimplicity. And let me give you three reasons why  ",
+    "start": 243.44,
+    "duration": 8.08
+  },
+  {
+    "text": "stuffing the context window directly may indeed be \nthe way to go. And reason number one is collapsing  ",
+    "start": 251.52,
+    "duration": 8.48
+  },
+  {
+    "text": "the infrastructure. A production RAG system. Well, \nit is quite heavy. You need a a chunking strategy  ",
+    "start": 260.0,
+    "duration": 7.92
+  },
+  {
+    "text": "which is like fixed size maybe or sliding window \nor recursive. You decide. You're going to need  ",
+    "start": 267.92,
+    "duration": 5.28
+  },
+  {
+    "text": "a embedding model to encode the data. You need \na a vector database to store it. You're going  ",
+    "start": 273.2,
+    "duration": 6.64
+  },
+  {
+    "text": "to need a reranker to sort the results. you need \nto keep all the vectors in sync with your source  ",
+    "start": 279.84,
+    "duration": 5.52
+  },
+  {
+    "text": "data. It's basically a lot of moving parts, a lot \nof places for things to break. And long context  ",
+    "start": 285.36,
+    "duration": 7.44
+  },
+  {
+    "text": "offers what we might call well just simply the uh \nthe no stack stack. You remove the database, you  ",
+    "start": 292.8,
+    "duration": 8.64
+  },
+  {
+    "text": "remove the embeddings, you remove the retrieval \nlogic. The architecture simplifies down to getting  ",
+    "start": 301.44,
+    "duration": 5.44
+  },
+  {
+    "text": "the data and just well sending it to the model. So \nthat's reason number one. Reason number two is the  ",
+    "start": 306.88,
+    "duration": 8.96
+  },
+  {
+    "text": "retrieval lottery. Now, RAG introduces a critical \npoint of failure here, the retrieval step itself,  ",
+    "start": 315.84,
+    "duration": 8.0
+  },
+  {
+    "text": "because when a user asks a question, RAG looks at \nmathematical representations of the data, which are  ",
+    "start": 323.84,
+    "duration": 6.88
+  },
+  {
+    "text": "stored in vectors. And vectors are basically \njust like a really long series of numbers in  ",
+    "start": 330.72,
+    "duration": 6.32
+  },
+  {
+    "text": "an array. And it tries to find the closest \nmatch. That's semantic search. But semantic  ",
+    "start": 337.04,
+    "duration": 6.4
+  },
+  {
+    "text": "search is probabilistic and for all manner of \nreasons, the retrieval might fail to find the  ",
+    "start": 343.44,
+    "duration": 5.84
+  },
+  {
+    "text": "relevant document. And we actually have a name \nfor this. It's called silent failure. The answer,  ",
+    "start": 349.28,
+    "duration": 6.48
+  },
+  {
+    "text": "well, it existed in the data, but the LLM never \nsaw it because the retrieval step didn't return  ",
+    "start": 355.76,
+    "duration": 5.52
+  },
+  {
+    "text": "the right results. With long context, there is no \nretrieval step. The model gets to see everything.  ",
+    "start": 361.28,
+    "duration": 6.8
+  },
+  {
+    "text": "Now, reason number three that is well, I think \nwe're going to call this the whole book problem.  ",
+    "start": 368.08,
+    "duration": 7.04
+  },
+  {
+    "text": "A RAG is fundamentally designed to retrieve \nwhat exists. It relies on finding a semantic  ",
+    "start": 375.12,
+    "duration": 6.08
+  },
+  {
+    "text": "match between your query and a specific snippet \nof text in your database. But what if the answer  ",
+    "start": 381.2,
+    "duration": 5.92
+  },
+  {
+    "text": "lies in what's not in the database? So, so let's \nsay you have a set of product requirements stored  ",
+    "start": 387.12,
+    "duration": 7.92
+  },
+  {
+    "text": "as a document and you've also got a set of release \nnotes stored as a document and then we ask which  ",
+    "start": 395.04,
+    "duration": 7.92
+  },
+  {
+    "text": "security requirements were omitted from the final \nrelease. Now using RAG when you query for omitted  ",
+    "start": 402.96,
+    "duration": 7.76
+  },
+  {
+    "text": "security requirements the vector search looks for \nchunks discussing well security and requirements.  ",
+    "start": 410.72,
+    "duration": 6.56
+  },
+  {
+    "text": "It retrieves snippets from the requirements doc. \nIt retrieves snippets from the release notes,  ",
+    "start": 417.28,
+    "duration": 5.6
+  },
+  {
+    "text": "but it cannot retrieve the gap between them. And \nbecause RAG only shows the model a few isolated  ",
+    "start": 422.88,
+    "duration": 6.16
+  },
+  {
+    "text": "snapshots, the model never sees the full picture \nrequired to spot the missing pieces. The model  ",
+    "start": 429.04,
+    "duration": 6.24
+  },
+  {
+    "text": "really needs both of these documents in full to \nperform the comparison, which is exactly what  ",
+    "start": 435.28,
+    "duration": 7.04
+  },
+  {
+    "text": "long context does by dumping the whole book, the \nfull requirements doc and the full release notes  ",
+    "start": 442.32,
+    "duration": 6.32
+  },
+  {
+    "text": "into the context window. So, is RAG dead? Is the \nvector database destined for the museum of things  ",
+    "start": 448.64,
+    "duration": 6.88
+  },
+  {
+    "text": "we needed in 2024? Well, not quite because while \nlong context wins on simplicity, RAG still has a  ",
+    "start": 455.52,
+    "duration": 8.08
+  },
+  {
+    "text": "place. And I got another three reasons to support \nthat. So, reason number one is the rereading text.  ",
+    "start": 463.6,
+    "duration": 9.44
+  },
+  {
+    "text": "Now, long context creates a massive compute \ninefficiency. So, if we take a manual, let's say  ",
+    "start": 473.04,
+    "duration": 6.64
+  },
+  {
+    "text": "this is like a a 500 page manual, and we've got to \nturn this into tokens. Well, that's something like  ",
+    "start": 479.68,
+    "duration": 8.32
+  },
+  {
+    "text": "250k of tokens. And we need to do that every time \nwe make a user query and we put this document in  ",
+    "start": 488.0,
+    "duration": 9.12
+  },
+  {
+    "text": "the prompt. You're basically requiring the model \nto process that manual every time. Now, RAG also  ",
+    "start": 497.12,
+    "duration": 6.24
+  },
+  {
+    "text": "has to process that manual, but it only pays that \nprocessing cost once at indexing time. Now, prompt  ",
+    "start": 503.36,
+    "duration": 6.96
+  },
+  {
+    "text": "caching that can partially offset some of this for \nstatic data, but for dynamic data streams where  ",
+    "start": 510.32,
+    "duration": 5.84
+  },
+  {
+    "text": "content changes frequently, you are stuck paying \nthe full tax on every request. Reason number two  ",
+    "start": 516.16,
+    "duration": 9.28
+  },
+  {
+    "text": "is the needle in the haystack problem. Now, \nthere's a an intuitive assumption that if data  ",
+    "start": 525.44,
+    "duration": 7.12
+  },
+  {
+    "text": "is in the context window, the model's probably \ngoing to use it, but research suggests otherwise.  ",
+    "start": 532.56,
+    "duration": 7.6
+  },
+  {
+    "text": "Because as we start with a context window and then \nit grows and it continues to grow and now we're at  ",
+    "start": 540.16,
+    "duration": 6.8
+  },
+  {
+    "text": "like 500,000 tokens, well, the model's attention \nmechanism can get a bit diluted. If you ask a  ",
+    "start": 546.96,
+    "duration": 7.28
+  },
+  {
+    "text": "specific question about a single paragraph that's \nburied in, let's say, the middle of a 2,000 page  ",
+    "start": 554.24,
+    "duration": 5.04
+  },
+  {
+    "text": "document, well, the model often fails to retrieve \nit or it hallucinates details from the surrounding  ",
+    "start": 559.28,
+    "duration": 6.72
+  },
+  {
+    "text": "text. But with RAG, we're giving the model less \nnoise. So by retrieving, say only the top five  ",
+    "start": 566.0,
+    "duration": 9.2
+  },
+  {
+    "text": "relevant chunks, RAG has removed the haystack \nand presents the model with just the needles.  ",
+    "start": 575.2,
+    "duration": 7.12
+  },
+  {
+    "text": "It forces the model to focus on the signal and \nnot the noise. And then reason number three,  ",
+    "start": 582.32,
+    "duration": 6.96
+  },
+  {
+    "text": "well that is the infinite data set. Now a context \nwindow of millions of tokens sounds great but in  ",
+    "start": 589.28,
+    "duration": 7.92
+  },
+  {
+    "text": "the scheme of enterprise data that's really just a \ndrop in the bucket. I mean an enterprise data lake  ",
+    "start": 597.2,
+    "duration": 8.64
+  },
+  {
+    "text": "that's probably measured in terabytes or or maybe \neven petabytes. So if you want an infinite data  ",
+    "start": 605.84,
+    "duration": 8.0
+  },
+  {
+    "text": "set that stores everything, you really do need to \nhave a retrieval layer to filter information down  ",
+    "start": 613.84,
+    "duration": 6.0
+  },
+  {
+    "text": "to something that fits into the LLM context \nwindow. So where does this leave us? Well,  ",
+    "start": 619.84,
+    "duration": 5.92
+  },
+  {
+    "text": "if your problem involves a bounded data set and \nrequires complex global reasoning like analyzing  ",
+    "start": 625.76,
+    "duration": 5.2
+  },
+  {
+    "text": "a specific legal contract or summarizing a book, I \nthink long context is the way to go. It simplifies  ",
+    "start": 630.96,
+    "duration": 7.04
+  },
+  {
+    "text": "the stack and it improves the reasoning. But \nif you're navigating the infinite data set of  ",
+    "start": 638.0,
+    "duration": 6.0
+  },
+  {
+    "text": "enterprise knowledge, the vector database remains \nthe only viable warehouse for your data. But how  ",
+    "start": 644.0,
+    "duration": 7.28
+  },
+  {
+    "text": "about you? Are you team long context, team RAG, \nmaybe a bit of both? Let me know in the comments.",
+    "start": 651.28,
+    "duration": 12.16
+  }
+]

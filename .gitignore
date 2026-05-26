@@ -9,3 +9,5 @@ backend/.venv/
 .env
 .env.*
 chroma_db/
+firebase-service-account.json
+*.db

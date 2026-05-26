@@ -69,31 +69,35 @@ def call_llm(prompt: str):
         temperature=0.2
     )
 
-def answer_question(video_id: str, question: str) -> dict:
+def answer_question(user_id: str, video_id: str, question: str) -> dict:
     """
     Full RAG question-answering pipeline.
     """
 
     question_embedding = create_embedding(question)
-    # cached = get_cached_answer(
-    # video_id=video_id,
-    # question_embedding=question_embedding
-    # )
+    
+    cached = get_cached_answer(
+        user_id=user_id,
+        video_id=video_id,
+        question_embedding=question_embedding
+    )
 
-    # if cached is not None:
-    #     return {
-    #         "video_id": video_id,
-    #         "question": question,
-    #         "answer": cached["answer"],
-    #         "sources": cached["sources"],
-    #         "cache": {
-    #             "hit": True,
-    #             "cached_question": cached["cached_question"],
-    #             "distance": cached["cache_distance"],
-    #             "created_at": cached["created_at"]
-    #         }
-    #     }
+    if cached is not None:
+        return {
+            "video_id": video_id,
+            "question": question,
+            "answer": cached["answer"],
+            "sources": cached["sources"],
+            "cache": {
+                "hit": True,
+                "cached_question": cached["cached_question"],
+                "distance": cached["cache_distance"],
+                "created_at": cached["created_at"]
+            }
+        }
+        
     initial_chunks = retrieve_chunks(
+    user_id=user_id,
     question_embedding=question_embedding,
     video_id=video_id,
     top_k=15
@@ -150,6 +154,7 @@ def answer_question(video_id: str, question: str) -> dict:
             "text_preview": chunk["text"][:300] + "..."
         })
     save_answer_to_cache(
+        user_id=user_id,
         video_id=video_id,
         question=question,
         question_embedding=question_embedding,
