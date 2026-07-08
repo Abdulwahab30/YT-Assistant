@@ -1,3 +1,14 @@
+---
+title: YT Assistant
+emoji: 📉
+colorFrom: green
+colorTo: pink
+sdk: docker
+pinned: false
+license: mit
+short_description: 'YT-Assistant allows you to have full conversations '
+---
+
 <div align="center">
 
 <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" />
