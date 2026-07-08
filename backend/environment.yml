@@ -6,7 +6,8 @@ dependencies:
   - python=3.11
   - pip
   # Core ML packages — installed via conda-forge for better binary compatibility
-  - pytorch::pytorch=2.1
+  - pytorch::pytorch=2.5
+  - pytorch::cpuonly
   - scipy
   - numpy
   - scikit-learn
