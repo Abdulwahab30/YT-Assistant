@@ -22,15 +22,16 @@ COPY backend/environment.yml /app/backend/environment.yml
 RUN conda env create -f /app/backend/environment.yml && \
     conda clean -afy
 
-# Copy the entire project into the container
-COPY . /app
+# Copy only what the app needs to run (skip cache/, chroma_db/, etc.)
+COPY backend/app /app/backend/app
+COPY frontend /app/frontend
 
-# Expose port 8000 (the default Uvicorn port)
-EXPOSE 8000
+# Hugging Face Spaces routes traffic to port 7860
+EXPOSE 7860
 
 # Set working directory to backend before starting the server
 WORKDIR /app/backend
 
 # Start the FastAPI application via Uvicorn using the conda env's Python
 # The PATH env var above ensures the conda env's executables are used
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860"]

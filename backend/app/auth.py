@@ -1,3 +1,4 @@
+import json
 import os
 
 import firebase_admin
@@ -18,14 +19,21 @@ def initialize_firebase() -> None:
     if firebase_admin._apps:
         return
 
+    # ponytail: HF Spaces secrets are env vars only (no file mounts), so the
+    # service account JSON can be passed inline instead of a file path.
+    service_account_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
     service_account_path = os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH")
 
-    if not service_account_path:
+    if service_account_json:
+        cred = credentials.Certificate(json.loads(service_account_json))
+    elif service_account_path:
+        cred = credentials.Certificate(service_account_path)
+    else:
         raise RuntimeError(
-            "FIREBASE_SERVICE_ACCOUNT_PATH is missing in .env"
+            "Set FIREBASE_SERVICE_ACCOUNT_JSON (inline JSON) or "
+            "FIREBASE_SERVICE_ACCOUNT_PATH (file path) in the environment."
         )
 
-    cred = credentials.Certificate(service_account_path)
     firebase_admin.initialize_app(cred)
 
 
