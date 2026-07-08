@@ -11,3 +11,4 @@ backend/.venv/
 chroma_db/
 firebase-service-account.json
 *.db
+hftk.txt
